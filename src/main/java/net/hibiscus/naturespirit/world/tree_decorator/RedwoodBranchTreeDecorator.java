@@ -37,6 +37,13 @@ public class RedwoodBranchTreeDecorator extends TreeDecorator {
     Random random = generator.getRandom();
     List<BlockPos> list = generator.getLogPositions();
     List<BlockPos> list2 = generator.getLeavesPositions();
+    // TreeFeature only rejects a tree when BOTH logs and leaves are empty, so a tree whose
+    // trunk was placed but whose foliage found no free position reaches this decorator with an
+    // empty leaves list. The branch anchors below index both lists without a check, which threw
+    // IndexOutOfBoundsException and crashed the server during feature placement.
+    if (list.isEmpty() || list2.isEmpty()) {
+      return;
+    }
     list.stream().filter((pos) -> pos.getY() < list2.get(0).getY() - 2 && pos.getY() > list.get(0).getY() + 2).forEach((pos) -> {
 
       if (random.nextFloat() <= this.probability) {
